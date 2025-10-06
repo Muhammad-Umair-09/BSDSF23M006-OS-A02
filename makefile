@@ -1,5 +1,3 @@
-# Feature 2: Long Listing Format (v1.1.0)
-# =======================================
 
 # Compiler and flags
 CC = gcc
@@ -11,9 +9,9 @@ BIN_DIR = bin
 OBJ_DIR = obj
 
 # Files
-TARGET = $(BIN_DIR)/lsv1.1.0
-SRC = $(SRC_DIR)/lsv1.1.0.c
-OBJ = $(OBJ_DIR)/lsv1.1.0.o
+TARGET = $(BIN_DIR)/lsv1.2.0
+SRC = $(SRC_DIR)/lsv1.2.0.c
+OBJ = $(OBJ_DIR)/lsv1.2.0.o
 
 # Default target
 all: $(TARGET)
