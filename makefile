@@ -1,6 +1,5 @@
-
-# Feature 1: Basic Build
-# ==============================
+# Feature 2: Long Listing Format (v1.1.0)
+# =======================================
 
 # Compiler and flags
 CC = gcc
@@ -12,9 +11,9 @@ BIN_DIR = bin
 OBJ_DIR = obj
 
 # Files
-TARGET = $(BIN_DIR)/lsv1.0.0
-SRC = $(SRC_DIR)/lsv1.0.0.c
-OBJ = $(OBJ_DIR)/lsv1.0.0.o
+TARGET = $(BIN_DIR)/lsv1.1.0
+SRC = $(SRC_DIR)/lsv1.1.0.c
+OBJ = $(OBJ_DIR)/lsv1.1.0.o
 
 # Default target
 all: $(TARGET)
@@ -32,7 +31,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 
 # Clean target (keep directories)
 clean:
-	rm -f $(OBJ_DIR)/*.o $(BIN_DIR)/lsv1.0.0
+	rm -f $(OBJ_DIR)/*.o $(BIN_DIR)/lsv1.1.0
 	@echo "🧹 Cleaned build files (directories kept)."
 
 # Run target
@@ -41,4 +40,3 @@ run: all
 	@$(TARGET)
 
 .PHONY: all clean run
-
