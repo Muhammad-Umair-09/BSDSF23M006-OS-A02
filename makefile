@@ -9,9 +9,10 @@ BIN_DIR = bin
 OBJ_DIR = obj
 
 # Files
-TARGET = $(BIN_DIR)/lsv1.2.0
-SRC = $(SRC_DIR)/lsv1.2.0.c
-OBJ = $(OBJ_DIR)/lsv1.2.0.o
+TARGET = $(BIN_DIR)/lsv1.3.0
+SRC = $(SRC_DIR)/lsv1.3.0.c
+OBJ = $(OBJ_DIR)/lsv1.3.0.o
+
 
 # Default target
 all: $(TARGET)
