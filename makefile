@@ -12,9 +12,9 @@ BIN_DIR = bin
 OBJ_DIR = obj
 
 # Files
-TARGET = $(BIN_DIR)/lsv1.5.0
-SRC = $(SRC_DIR)/lsv1.5.0.c
-OBJ = $(OBJ_DIR)/lsv1.5.0.o
+TARGET = $(BIN_DIR)/lsv1.6.0
+SRC = $(SRC_DIR)/lsv1.6.0.c
+OBJ = $(OBJ_DIR)/lsv1.6.0.o
 
 # ==============================
 # Default target
@@ -25,7 +25,7 @@ all: $(TARGET)
 $(TARGET): $(OBJ)
 	@mkdir -p $(BIN_DIR)
 	$(CC) $(CFLAGS) $(OBJ) -o $(TARGET)
-	@echo "✅ Build complete: $(TARGET)"
+	@echo "Build complete: $(TARGET)"
 
 # Compilation step
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
