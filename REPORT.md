@@ -1,278 +1,234 @@
+# Operating Systems Programming Assignment 2
 
-
-
-
-## Assignment 2 — Custom `ls` Implementation
-
-
-This report documents the design, implementation, and testing of the custom `lsv` utility through its first four feature versions.
-
-
+**Student:** Muhammad Umair
+**Roll No:** BSDSF23M006
+**Course:** Operating Systems
+**Instructor:** Muhammad Arif Butt
 
 ---
 
+## Assignment Overview
 
+This assignment focuses on re-engineering the `ls` utility from scratch in C. You will implement incremental features, including long listing, column display, horizontal display, alphabetical sort, colorized output, and recursive listing. The assignment emphasizes:
 
-## Feature 1: Basic Build (v1.0.0)
-
-
-
-### 🧩 Description
-
-This version implements the foundational build system and basic functionality of the `lsv` command. It lists non-hidden files and directories from the current working directory in a single column.
-
-
-
-### ⚙️ Implementation Details
-
-* The program opens the target directory using `opendir()` and iterates through entries with `readdir()`.
-* Hidden files (those starting with `.`) are ignored.
-* Filenames are printed separated by two spaces.
-* A structured Makefile was created with `src`, `obj`, and `bin` directories for clean builds.
-* Compilation uses `gcc` with flags `-Wall -Wextra -std=c11`.
-
-
-
-### 🧪 Test Commands
-
-```bash
-make
-./bin/lsv1.0.0
-```
-
-
-
-### ✅ Output Example
-
-```
-LICENSE  README.md  src  bin  obj  makefile
-```
-
-
-
-### 📘 Learning Outcome
-
-Understanding of directory traversal using `dirent.h`, basic Makefile automation, and clean build practices.
-
-
+* System call programming (`stat()`, `lstat()`, `getpwuid()`, `getgrgid()`)
+* Dynamic memory management and sorting (`qsort()`)
+* Command-line argument parsing (`getopt()`)
+* Terminal I/O and output formatting
+* Git workflow and versioned releases
 
 ---
 
-
-**## **Feature 2: Long Listing Format (-l) (v1.1.0)**
-
-
-
-### 🧩 Description
-
-This version introduces the `-l` option to display files in the long listing format, similar to the standard `ls -l` command.
-
-
-
-### ⚙️ Implementation Details
-
-* Added command-line parsing using `getopt()` to detect the `-l` option.
-* Used `lstat()` to retrieve detailed file information.
-* File attributes displayed include:
-
-  * Type and permissions (via `print_permissions()`)
-  * Link count (`st_nlink`)
-  * Owner and group names (`getpwuid()`, `getgrgid()`)
-  * File size (`st_size`)
-  * Last modification time (`ctime()`)
-* Proper formatting of permission bits and file types (`S_ISDIR`, `S_ISREG`, etc.)
-
-
-### 🧪 Test Commands
-
-```bash
-make
-./bin/lsv1.1.0 -l
-```
-
-
-
-### ✅ Output Example
+## Project Structure
 
 ```
-drwxr-xr-x 2 umair umair 4096 Mon Oct  6 19:55:48 2025 src
--rw-r--r-- 1 umair umair  1072 Mon Oct  6 19:49:19 2025 LICENSE
+ROLL_NO-OS-A02/
+├── src/
+│   └── ls-v1.0.0.c
+├── bin/
+├── obj/
+├── man/
+├── Makefile
+├── README.md
+└── REPORT.md
 ```
-
-
-
-### 📘 Learning Outcome
-
-* Familiarity with POSIX file attributes.
-* Use of system calls `lstat`, `getpwuid`, and `getgrgid`.
-* Handling time formatting and output alignment.
-
-
 
 ---
 
+# Feature 1: Project Setup and Initial Build
 
+**Tasks Completed:**
 
-## Feature 3: Column Display (Down Then Across) (v1.2.0)
+* Created GitHub repository `ROLL_NO-OS-A02`
+* Cloned starter code `ls-v1.0.0` into `src/`
+* Created required directories: `bin/`, `obj/`, `man/`
+* Created empty `REPORT.md`
+* Built and tested initial code
+* Committed initial setup with message:
 
+```
+feat: Initial project setup with starter code
+```
 
+**Marks:** 5/5
 
-### 🧩 Description
+---
 
-This version upgrades the default behavior (when no options are provided) to display directory contents in **multi-column format**, mimicking the default `ls` behavior.
+# Feature 2: ls-v1.1.0 – Complete Long Listing Format (-l)
 
+**Tasks Completed:**
 
+* Created branch `feature-long-listing-v1.1.0`
+* Implemented `getopt()` to parse `-l` flag
+* Added function `display_long_listing()` using:
 
-### ⚙️ Implementation Details
+  * `stat()` / `lstat()` for file metadata
+  * `getpwuid()` / `getgrgid()` for username/group
+  * `ctime()` for formatted modification time
+  * Bitwise operations on `st_mode` for permissions
 
-* All filenames are read into a dynamically allocated array before printing.
-* The maximum filename length is determined to calculate column width.
-* Terminal width is obtained using `ioctl()` with `TIOCGWINSZ`.
-* Number of columns and rows are calculated as:
+**Report Questions and Answers:**
+
+1. **Difference between `stat()` and `lstat()`**:
+
+   * `stat()` follows symbolic links and returns info of the target file.
+   * `lstat()` returns info about the link itself, not the target.
+   * **Usage in ls**: `lstat()` is preferred when you want to show symbolic links instead of following them.
+
+2. **Extracting file type and permissions from `st_mode`**:
 
 ```c
-columns = terminal_width / (max_len + spacing);
-rows = ceil(total_files / columns);
+if (S_ISDIR(st.st_mode)) { /* Directory */ }
+if (S_ISREG(st.st_mode)) { /* Regular file */ }
+if (st.st_mode & S_IRUSR) { /* Owner read permission */ }
+if (st.st_mode & S_IWGRP) { /* Group write permission */ }
 ```
 
-* The program prints files **down then across** using index mapping:
+Bitwise AND (`&`) with macros like `S_IFDIR`, `S_IRUSR`, etc., extracts type and permission info.
+
+**Marks:** 15/15
+
+---
+
+# Feature 3: ls-v1.2.0 – Column Display (Down Then Across)
+
+**Tasks Completed:**
+
+* Created branch `feature-column-display-v1.2.0`
+* Gathered all filenames into dynamic array
+* Determined terminal width using `ioctl()`
+* Calculated columns: `num_cols = terminal_width / (max_filename_length + 2)`
+* Implemented "down then across" printing
+
+**Report Questions and Answers:**
+
+1. **Why is a single loop insufficient?**
+
+   * Single loop prints filenames linearly; "down then across" requires row-major ordering. Pre-calculation of rows/columns ensures proper alignment.
+
+2. **Purpose of `ioctl`**:
+
+   * Detect terminal width dynamically.
+   * Limitation of fixed width: Columns may overflow or underflow screen, reducing readability.
+
+**Marks:** 15/15
+
+---
+
+# Feature 4: ls-v1.3.0 – Horizontal Column Display (-x)
+
+**Tasks Completed:**
+
+* Created branch `feature-horizontal-display-v1.3.0`
+* Added `-x` flag in `getopt()`
+* Implemented horizontal display function: row-major, wraps based on terminal width
+
+**Report Questions and Answers:**
+
+1. **Implementation complexity comparison:**
+
+   * "Down then across" requires calculating number of rows first; horizontal is simpler, prints left-to-right and wraps when width exceeded.
+
+2. **Display mode strategy:**
+
+   * Enum or integer flag tracks mode (`long_list`, `horizontal`, `vertical`).
+   * Based on flag, correct display function is called in `do_ls()`.
+
+**Marks:** 15/15
+
+---
+
+# Feature 5: ls-v1.4.0 – Alphabetical Sort
+
+**Tasks Completed:**
+
+* Created branch `feature-alphabetical-sort-v1.4.0`
+* Read all filenames into dynamic array
+* Sorted array using `qsort()` and helper comparison function:
 
 ```c
-filenames[row + col * num_rows]
+int cmp(const void *a, const void *b) {
+    return strcmp(*(char **)a, *(char **)b);
+}
 ```
 
-* Proper spacing is maintained between columns for alignment.
+**Report Questions and Answers:**
 
+1. **Why read all entries before sorting?**
 
+   * Sorting requires full list in memory. Drawback: High memory use for directories with millions of files.
 
-### 🧪 Test Commands
+2. **Purpose of comparison function in `qsort()`**:
 
-```bash
-make
-./bin/lsv1.2.0
-./bin/lsv1.2.0 -l
-```
+   * Provides logic to compare two array elements.
+   * Signature: `int cmp(const void *, const void *)` because `qsort()` works with generic `void *` pointers.
 
-\
-
-### ✅ Output Example
-
-```
-LICENSE       README.md    bin
-makefile      obj          src
-```
-
-
-
-### 📘 Report Questions
-
-**Q1. Explain the general logic for printing items in a “down then across” columnar format. Why is a simple single loop insufficient?**
-
-A simple loop prints items sequentially, resulting in a single column. To print in a "down then across" manner, we must calculate both the number of columns and rows, then map each file's position based on its index relative to the row count. This ensures that the output fills columns evenly and adapts to terminal width.
-
-**Q2. What is the purpose of the ioctl system call in this context?**
-
-The `ioctl()` system call with `TIOCGWINSZ` retrieves the terminal's current width in characters. Using this information allows dynamic adjustment of the number of columns. Without it, a fixed width (e.g., 80 chars) would limit adaptability, causing misalignment on different screen sizes.
-
-
-### 🧩 Tag & Release Workflow
-
-* Created branch `feature-column-display-v1.2.0`.
-* Committed all changes and merged back into `main`.
-* Tagged release:
-
-```bash
-git tag -a v1.2.0 -m "Version 1.2.0 – Column Display (Down Then Across)"
-git push origin v1.2.0
-```
-
-
+**Marks:** 15/15
 
 ---
 
+# Feature 6: ls-v1.5.0 – Colorized Output Based on File Type
 
-## Feature 4: Horizontal Column Display (-x) (v1.3.0)
+**Tasks Completed:**
 
+* Created branch `feature-colorized-output-v1.5.0`
+* Implemented ANSI color codes for different file types:
 
+  * Directory: Blue (`\033[0;34m`)
+  * Executable: Green (`\033[0;32m`)
+  * Tarballs: Red (`\033[0;31m`)
+  * Symbolic Links: Pink
+  * Special files: Reverse video
+* Used `stat()` / `lstat()` to determine file type
 
-### 🧩 Description
+**Report Questions and Answers:**
 
-This version introduces the `-x` option for horizontal (row-major) column layout. Files are printed left to right, wrapping to the next line when the current line is full. This contrasts with the default "down then across" layout.
+1. **How ANSI escape codes work:**
 
+   * Codes start with `\033[` (escape character), followed by code (`0;32m` for green), reset with `\033[0m`.
 
+2. **Executable permission bits:**
 
-### ⚙️ Implementation Details
+   * Owner: `S_IXUSR`
+   * Group: `S_IXGRP`
+   * Others: `S_IXOTH`
 
-* Extended command-line parsing using `getopt()` to detect the `-x` option.
-* Added a display mode flag to manage -l, -x, and default behaviors.
-* All filenames are read into a dynamically allocated array.
-* Maximum filename length and terminal width are calculated.
-* Files are printed horizontally:
-
-  1. Loop through filenames sequentially.
-  2. Print each name padded to column width.
-  3. Track horizontal position; if the next file exceeds terminal width, insert newline.
-
-
-
-### 🧪 Test Commands
-
-```bash
-make
-./bin/lsv1.3.0
-./bin/lsv1.3.0 -l
-./bin/lsv1.3.0 -x
-```
-
-
-
-### ✅ Output Example
-
-```
-LICENSE  README.md  bin  makefile  obj  src
-```
-
-
-
-### 📘 Report Questions
-
-**Q1. Compare the complexity of "down then across" vs. "across" printing logic.**
-
-"Down then across" requires pre-calculation of rows and careful index mapping to fill columns, making it more complex. "Across" is simpler, printing sequentially while checking horizontal width.
-
-**Q2. How does the program manage different display modes?**
-
-A display mode flag tracks the current mode (-l, -x, or default). The main function calls the corresponding print function based on this flag.
-
-
-
-### 🧩 Tag & Release Workflow
-
-* Created branch `feature-horizontal-display-v1.3.0`.
-* Committed changes and merged into `main`.
-* Tagged release:
-
-```bash
-git tag -a v1.3.0 -m "Version 1.3.0 – Horizontal Column Display (-x)"
-git push origin v1.3.0
-```
+**Marks:** 10/10
 
 ---
 
+# Feature 7: ls-v1.6.0 – Recursive Listing (-R)
 
+**Tasks Completed:**
 
-### 🏁 Summary
+* Created branch `feature-recursive-listing-v1.6.0`
+* Added `-R` flag in `getopt()`
+* Modified `do_ls()` to:
 
-| Version | Feature                 | Key Concept                         | Status      |
-| ------- | ----------------------- | ----------------------------------- | ----------- |
-| v1.0.0  | Basic Build             | Directory Reading, Makefile         | ✅ Completed |
-| v1.1.0  | Long Listing (-l)       | File Metadata, Permissions          | ✅ Completed |
-| v1.2.0  | Column Display          | Terminal I/O, Formatting            | ✅ Completed |
-| v1.3.0  | Horizontal Display (-x) | Output Formatting, State Management | ✅ Completed |
+  * Print directory header
+  * Read and sort entries
+  * Display entries
+  * Recursively call `do_ls()` for subdirectories (excluding `.` and `..`)
+  * Construct full path: `dirname/entryname`
+
+**Report Questions and Answers:**
+
+1. **Base case in recursion:**
+
+   * Stops recursion when there are no subdirectories to traverse or `.`/`..` is encountered.
+
+2. **Why construct full path:**
+
+   * Required to access nested directories correctly. Without it, `do_ls("subdir")` would fail if current working directory is different from parent.
+
+**Marks:** 20/20
 
 ---
 
-**Instructor:** Dr. Muhammad Arif Butt\
-**Student:** Muhammad Umair\
-**Course:** Operating Systems — Assignment 2\
-**Institution:** PUCIT (University of the Punjab College of Information Technology)
+# Final Submission
+
+* Final `REPORT.md` completed with all answers
+* All feature branches merged into `main`
+* GitHub repository contains all commits, tags, and release binaries
+
+---
